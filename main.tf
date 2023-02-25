@@ -122,7 +122,7 @@ resource "aws_nat_gateway" "NATgw" {
 ######################################### SECURITY INFRASTRUCTURE #######################################
 #########################################################################################################
 
-resource "aws_security_group" "HA_WebApp_HTTP_TF" {
+resource "aws_security_group" "HA_WebApp_HTTP_SG_TF" {
   name = "Allow HTTP"
   description = "Allow HTTP inbound traffic"
   vpc_id = aws_vpc.HA_WebApp_TF.id
@@ -147,7 +147,7 @@ resource "aws_security_group" "HA_WebApp_HTTP_TF" {
   }
 }
 
-resource "aws_security_group" "HA_WebApp_DB_TF" {
+resource "aws_security_group" "HA_WebApp_DB_SG_TF" {
   name = "Allow PostgreSQL access from LAN"
   description = "Allow incoming PostgreSQL access from LAN"
   vpc_id = aws_vpc.HA_WebApp_TF.id
@@ -179,7 +179,8 @@ resource "aws_security_group" "HA_WebApp_DB_TF" {
 resource "aws_instance" "HA_WebApp_LB_TF" {
   ami           = "ami-0dfcb1ef8550277af"
   instance_type = "t2.micro"
-  
+  subnet_id = aws_subnet.HA_WebApp_Public_1.id
+  vpc_security_group_ids = [aws_security_group.HA_WebApp_HTTP_SG_TF.id]
   tags = {
     Name = "HA_WebApp_LB_TF"
   }
@@ -188,7 +189,8 @@ resource "aws_instance" "HA_WebApp_LB_TF" {
 resource "aws_instance" "HA_WebApp_DB_TF" {
   ami           = "ami-0dfcb1ef8550277af"
   instance_type = "t2.micro"
-  security_groups = ["Allow PostgreSQL Inbound Access from LAN"]
+  subnet_id = aws_subnet.HA_WebApp_Private_1.id
+  vpc_security_group_ids = [aws_security_group.HA_WebApp_DB_SG_TF.id]
   tags = {
     Name = "HA_WebApp_DB_TF"
   }
@@ -197,7 +199,8 @@ resource "aws_instance" "HA_WebApp_DB_TF" {
 resource "aws_instance" "HA_WebApp_App1_TF" {
   ami           = "ami-0dfcb1ef8550277af"
   instance_type = "t2.micro"
-  
+  subnet_id = aws_subnet.HA_WebApp_Public_1.id
+  vpc_security_group_ids = [aws_security_group.HA_WebApp_HTTP_SG_TF.id]
   tags = {
     Name = "HA_WebApp_App1_TF"
   }
@@ -206,8 +209,10 @@ resource "aws_instance" "HA_WebApp_App1_TF" {
 resource "aws_instance" "HA_WebApp_App2_TF" {
   ami           = "ami-0dfcb1ef8550277af"
   instance_type = "t2.micro"
-  
+  subnet_id = aws_subnet.HA_WebApp_Public_2.id
+  vpc_security_group_ids = [aws_security_group.HA_WebApp_HTTP_SG_TF.id]
   tags = {
     Name = "HA_WebApp_App2_TF"
   }
 }
+
