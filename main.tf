@@ -134,6 +134,13 @@ resource "aws_security_group" "HA_WebApp_HTTP_SG_TF" {
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
+  ingress {
+    description      = "SSH"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port        = 0
@@ -177,42 +184,106 @@ resource "aws_security_group" "HA_WebApp_DB_SG_TF" {
 #########################################################################################################
 
 resource "aws_instance" "HA_WebApp_LB_TF" {
+  associate_public_ip_address = true
   ami           = "ami-0dfcb1ef8550277af"
+  key_name = "MylesNewKey"
   instance_type = "t2.micro"
   subnet_id = aws_subnet.HA_WebApp_Public_1.id
   vpc_security_group_ids = [aws_security_group.HA_WebApp_HTTP_SG_TF.id]
   tags = {
     Name = "HA_WebApp_LB_TF"
   }
+  user_data = <<EOF
+    #!/bin/bash
+    hostname "HA-WebApp-LB-TF"
+    OS_TYPE=$(cat /etc/os-release | awk -F'=' '/^NAME/ {print $2}'| tr -t '"' ' ' | xargs)
+    export DD_API_KEY="${var.datadog_apikey}"
+    export DD_SITE="us5.datadoghq.com"
+    if [[ $OS_TYPE == "Amazon Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    elif [[ $OS_TYPE == "Red Hat Enterprise Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    fi
+	EOF
 }
 
 resource "aws_instance" "HA_WebApp_DB_TF" {
+  associate_public_ip_address = true    
   ami           = "ami-0dfcb1ef8550277af"
+  key_name = "MylesNewKey"
   instance_type = "t2.micro"
   subnet_id = aws_subnet.HA_WebApp_Private_1.id
   vpc_security_group_ids = [aws_security_group.HA_WebApp_DB_SG_TF.id]
   tags = {
     Name = "HA_WebApp_DB_TF"
   }
+  user_data = <<EOF
+    #!/bin/bash
+    hostname "HA-WebApp-DB-TF"
+    OS_TYPE=$(cat /etc/os-release | awk -F'=' '/^NAME/ {print $2}'| tr -t '"' ' ' | xargs)
+    export DD_API_KEY="${var.datadog_apikey}"
+    export DD_SITE="us5.datadoghq.com"
+    if [[ $OS_TYPE == "Amazon Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    elif [[ $OS_TYPE == "Red Hat Enterprise Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    fi
+	EOF
 }
 
 resource "aws_instance" "HA_WebApp_App1_TF" {
+  associate_public_ip_address = true
   ami           = "ami-0dfcb1ef8550277af"
+  key_name = "MylesNewKey"
   instance_type = "t2.micro"
   subnet_id = aws_subnet.HA_WebApp_Public_1.id
   vpc_security_group_ids = [aws_security_group.HA_WebApp_HTTP_SG_TF.id]
   tags = {
     Name = "HA_WebApp_App1_TF"
   }
+  user_data = <<EOF
+    #!/bin/bash
+    hostname "HA-WebApp-App1-TF"
+    OS_TYPE=$(cat /etc/os-release | awk -F'=' '/^NAME/ {print $2}'| tr -t '"' ' ' | xargs)
+    export DD_API_KEY="${var.datadog_apikey}"
+    export DD_SITE="us5.datadoghq.com"
+    if [[ $OS_TYPE == "Amazon Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    elif [[ $OS_TYPE == "Red Hat Enterprise Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    fi
+	EOF
 }
 
 resource "aws_instance" "HA_WebApp_App2_TF" {
+  associate_public_ip_address = true
   ami           = "ami-0dfcb1ef8550277af"
+  key_name = "MylesNewKey"
   instance_type = "t2.micro"
   subnet_id = aws_subnet.HA_WebApp_Public_2.id
   vpc_security_group_ids = [aws_security_group.HA_WebApp_HTTP_SG_TF.id]
   tags = {
     Name = "HA_WebApp_App2_TF"
   }
+  user_data = <<EOF
+    #!/bin/bash
+    hostname "HA-WebApp-App2-TF"
+    OS_TYPE=$(cat /etc/os-release | awk -F'=' '/^NAME/ {print $2}'| tr -t '"' ' ' | xargs)
+    export DD_API_KEY="${var.datadog_apikey}"
+    export DD_SITE="us5.datadoghq.com"
+    if [[ $OS_TYPE == "Amazon Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    elif [[ $OS_TYPE == "Red Hat Enterprise Linux" ]]
+    then
+        bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+    fi
+	EOF
 }
 
